@@ -1,5 +1,5 @@
 <template>
-  <div class="card" v-bind:class="{ flip: visible }" @click="selectCard">
+  <div class="card" v-bind:class="{ flip: visible , hide: matched}" @click="selectCard">
     <div  class="card-face is-front">
       <img :src="`/images/${value}.png`" :alt="value" style="height: 120px; border-radius: 10px"  />
     </div>
@@ -29,6 +29,8 @@ export default {
   setup(props, context) {
     
     const selectCard = () => {
+      if(props.matched) return
+
       context.emit('select-card', {
         position: props.position,
         faceValue: props.value
@@ -75,5 +77,8 @@ export default {
     background-size: cover;
     color: white;
   }
- 
+ .hide .card-face{
+   /* display: none; */
+   filter: grayscale(1);
+ }
 </style>

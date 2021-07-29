@@ -1,6 +1,6 @@
 <template>
   <h1>Poro card game</h1>
-  
+
   <section class="game-board">
     <Card
       v-for="(card, index) in cardList"
@@ -13,9 +13,7 @@
     />
   </section>
   <h2>{{ status }}</h2>
-  <button @click="restartGame" class="restart-btn">
-     Restart Game
-  </button>
+  <button @click="restartGame" class="restart-btn">Restart Game</button>
 </template>
 
 <script>
@@ -28,6 +26,8 @@ export default {
     Card,
   },
   setup() {
+    let firstCard = ref("");
+    let secondCard = ref("");
     const cardList = ref([]);
     const userSelection = ref([]);
     const status = computed(() => {
@@ -87,53 +87,90 @@ export default {
         position: index,
       };
     });
+
+    const checkMatched = () =>{
+        console.log('check for matched', cardList.value[firstCard.value].value, cardList.value[secondCard.value].value )
+        if(cardList.value[firstCard.value].value === cardList.value[secondCard.value].value){
+          cardList.value[firstCard.value].matched = true;
+          cardList.value[secondCard.value].matched = true
+          cardList.value[firstCard.value].visible = true;
+          cardList.value[secondCard.value].visible = true;
+          firstCard.value = ''
+          secondCard.value = ''
+          console.log('gasit')
+        } 
+
+    }
     const flipCard = (payload) => {
       cardList.value[payload.position].visible = true;
-      if (userSelection.value[0]) {
-        if (
-          userSelection.value[0].position === payload.position &&
-          userSelection.value[0].faceValue === payload.faceValue
-        ) {
-          return;
-        } else {
-          userSelection.value[1] = payload;
+
+      if (
+        firstCard.value === payload.position ||
+        secondCard.value === payload.position
+      ) {
+        console.log("aceasi");
+        cardList.value[payload.position].visible = false;
+
+        if(firstCard.value === payload.position){
+          console.log("aceasi unu")
+          
+          if(secondCard.value !== ''){
+              firstCard.value = secondCard.value
+
+              secondCard.value = ''
+              return
+          }
+          firstCard.value = ""
+          return null
         }
-      } else {
-        userSelection.value[0] = payload;
+
+      if(secondCard.value === payload.position){
+          console.log('aceasi doi')
+          secondCard.value = ''
+
+
+      }
+
+        // firstCard.value = "";
+        // secondCard.value = '';
+        return null;
+      }
+
+      if (firstCard.value !== "" && secondCard.value !== "") {
+        console.log("trei");
+
+        cardList.value[firstCard.value].visible = false;
+        firstCard.value = secondCard.value;
+        secondCard.value = payload.position;
+        checkMatched()
+        return
+      }
+
+      if (firstCard.value !== "" && secondCard.value === "") {
+        console.log("doi");
+        secondCard.value = payload.position;
+        checkMatched()
+        return
+        // cardList.value[firstCard.value].visible = false;
+      }
+
+      if (firstCard.value === "") {
+        console.log("unu");
+        firstCard.value = payload.position;
       }
     };
-    watch(
-      userSelection,
-      (currentValue) => {
-        if (currentValue.length === 2) {
-          const cardOne = currentValue[0];
-          const cardTwo = currentValue[1];
-          if (cardOne.faceValue === cardTwo.faceValue) {
-            cardList.value[cardOne.position].matched = true;
-            cardList.value[cardTwo.position].matched = true;
-          } else {
-            setTimeout(() => {
-              cardList.value[cardOne.position].visible = false;
-              cardList.value[cardTwo.position].visible = false;
-            }, 2000);
-          }
-          userSelection.value.length = 0;
-        }
-      },
-      { deep: true }
-    );
+    
     return {
       cardList,
       flipCard,
-      userSelection,
       status,
       shuffleCards,
       restartGame,
     };
   },
-  mounted () {
-    this.restartGame()
-  }
+  mounted() {
+    this.restartGame();
+  },
 };
 </script>
 
@@ -159,7 +196,7 @@ body {
   justify-content: center;
 }
 
-.restart-btn{
+.restart-btn {
   background-color: rgb(16, 38, 51);
   color: goldenrod;
   border: goldenrod 3px solid;
