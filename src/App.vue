@@ -20,6 +20,7 @@
 import _ from "lodash";
 import { computed, ref, watch } from "vue";
 import Card from "./components/Card";
+import { launchConfetti } from "../src/utilities/confetti";
 export default {
   name: "App",
   components: {
@@ -29,7 +30,7 @@ export default {
     let firstCard = ref("");
     let secondCard = ref("");
     const cardList = ref([]);
-    const userSelection = ref([]);
+    // const userSelection = ref([]);
     const status = computed(() => {
       if (remainingPairs.value === 0) {
         return "You won!";
@@ -88,19 +89,25 @@ export default {
       };
     });
 
-    const checkMatched = () =>{
-        console.log('check for matched', cardList.value[firstCard.value].value, cardList.value[secondCard.value].value )
-        if(cardList.value[firstCard.value].value === cardList.value[secondCard.value].value){
-          cardList.value[firstCard.value].matched = true;
-          cardList.value[secondCard.value].matched = true
-          cardList.value[firstCard.value].visible = true;
-          cardList.value[secondCard.value].visible = true;
-          firstCard.value = ''
-          secondCard.value = ''
-          console.log('gasit')
-        } 
-
-    }
+    const checkMatched = () => {
+      console.log(
+        "check for matched",
+        cardList.value[firstCard.value].value,
+        cardList.value[secondCard.value].value
+      );
+      if (
+        cardList.value[firstCard.value].value ===
+        cardList.value[secondCard.value].value
+      ) {
+        cardList.value[firstCard.value].matched = true;
+        cardList.value[secondCard.value].matched = true;
+        cardList.value[firstCard.value].visible = true;
+        cardList.value[secondCard.value].visible = true;
+        firstCard.value = "";
+        secondCard.value = "";
+        console.log("gasit");
+      }
+    };
     const flipCard = (payload) => {
       cardList.value[payload.position].visible = true;
 
@@ -111,25 +118,23 @@ export default {
         console.log("aceasi");
         cardList.value[payload.position].visible = false;
 
-        if(firstCard.value === payload.position){
-          console.log("aceasi unu")
-          
-          if(secondCard.value !== ''){
-              firstCard.value = secondCard.value
+        if (firstCard.value === payload.position) {
+          console.log("aceasi unu");
 
-              secondCard.value = ''
-              return
+          if (secondCard.value !== "") {
+            firstCard.value = secondCard.value;
+
+            secondCard.value = "";
+            return;
           }
-          firstCard.value = ""
-          return null
+          firstCard.value = "";
+          return null;
         }
 
-      if(secondCard.value === payload.position){
-          console.log('aceasi doi')
-          secondCard.value = ''
-
-
-      }
+        if (secondCard.value === payload.position) {
+          console.log("aceasi doi");
+          secondCard.value = "";
+        }
 
         // firstCard.value = "";
         // secondCard.value = '';
@@ -142,15 +147,15 @@ export default {
         cardList.value[firstCard.value].visible = false;
         firstCard.value = secondCard.value;
         secondCard.value = payload.position;
-        checkMatched()
-        return
+        checkMatched();
+        return;
       }
 
       if (firstCard.value !== "" && secondCard.value === "") {
         console.log("doi");
         secondCard.value = payload.position;
-        checkMatched()
-        return
+        checkMatched();
+        return;
         // cardList.value[firstCard.value].visible = false;
       }
 
@@ -159,7 +164,13 @@ export default {
         firstCard.value = payload.position;
       }
     };
-    
+
+    watch(remainingPairs, currentValue => {
+      if(currentValue === 0){
+        launchConfetti()
+      }
+    })
+
     return {
       cardList,
       flipCard,

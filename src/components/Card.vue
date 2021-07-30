@@ -61,6 +61,7 @@ export default {
     justify-content: center;
     position: absolute;
     backface-visibility: hidden;
+    
   }
 
   .card-face.is-front {
