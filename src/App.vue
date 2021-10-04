@@ -13,7 +13,10 @@
     />
   </section>
   <h2>{{ status }}</h2>
-  <button @click="restartGame" class="restart-btn">Restart Game</button>
+  <h2>{{ timer }} </h2>
+  <button @click="inProgres ? restartGame() : startGame()" class="restart-btn">
+    {{ inProgres ? "Restart" : "Start" }}
+  </button>
 </template>
 
 <script>
@@ -26,10 +29,19 @@ export default {
   components: {
     Card,
   },
+
   setup() {
+    const timer = ref(0)
+    let inProgres = ref(false);
     let firstCard = ref("");
     let secondCard = ref("");
     const cardList = ref([]);
+    
+    const count = () =>{
+      setInterval(() => {
+        timer.value ++
+      }, 1000);
+    }
     // const userSelection = ref([]);
     const status = computed(() => {
       if (remainingPairs.value === 0) {
@@ -47,8 +59,11 @@ export default {
     const shuffleCards = () => {
       cardList.value = _.shuffle(cardList.value);
     };
-    const restartGame = () => {
-      shuffleCards();
+
+    const startGame = () => {
+      count()
+      inProgres.value = true;
+       shuffleCards()
       cardList.value = cardList.value.map((card, index) => {
         return {
           ...card,
@@ -58,6 +73,32 @@ export default {
         };
       });
     };
+    const restartGame = () => {
+      timer.value = 0
+      firstCard.value = "";
+      secondCard.value = "";
+      setTimeout(shuffleCards, 500);
+      cardList.value = cardList.value.map((card, index) => {
+        return {
+          ...card,
+          matched: false,
+          position: index,
+          visible: false,
+        };
+      });
+    };
+    const setupGame = () => {
+       shuffleCards()
+      cardList.value = cardList.value.map((card, index) => {
+        return {
+          ...card,
+          matched: false,
+          position: index,
+          visible: false,
+        };
+      });
+      
+    }
     const cardItems = [
       "poro1",
       "poro2",
@@ -105,10 +146,12 @@ export default {
         cardList.value[secondCard.value].visible = true;
         firstCard.value = "";
         secondCard.value = "";
-        console.log("gasit");
       }
     };
     const flipCard = (payload) => {
+
+      if(!inProgres.value) return
+
       cardList.value[payload.position].visible = true;
 
       if (
@@ -165,11 +208,11 @@ export default {
       }
     };
 
-    watch(remainingPairs, currentValue => {
-      if(currentValue === 0){
-        launchConfetti()
+    watch(remainingPairs, (currentValue) => {
+      if (currentValue === 0) {
+        launchConfetti();
       }
-    })
+    });
 
     return {
       cardList,
@@ -177,10 +220,16 @@ export default {
       status,
       shuffleCards,
       restartGame,
+      inProgres,
+      startGame,
+      setupGame,
+      count,
+      timer,
     };
   },
   mounted() {
-    this.restartGame();
+
+    this.setupGame()
   },
 };
 </script>
